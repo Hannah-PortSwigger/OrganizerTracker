@@ -1,10 +1,8 @@
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.ui.menu.BasicMenuItem;
-import burp.api.montoya.ui.menu.Menu;
+import burp.api.montoya.persistence.PersistedList;
 
-import javax.swing.*;
-
+@SuppressWarnings("unused")
 public class OrganizerTracker implements BurpExtension
 {
     private static final String NAME = "Organizer Tracker";
@@ -14,6 +12,15 @@ public class OrganizerTracker implements BurpExtension
     {
         api.extension().setName(NAME);
 
-        api.http().registerHttpHandler(new MyHttpHandler(api));
+        PersistedList<String> uniqueUrlList = api.persistence().extensionData().getStringList("uniqueUrlList") != null
+                ? api.persistence().extensionData().getStringList("uniqueUrlList")
+                : PersistedList.persistedStringList();
+
+        if (uniqueUrlList.isEmpty())
+        {
+            api.persistence().extensionData().setStringList("uniqueUrlList", uniqueUrlList);
+        }
+
+        api.http().registerHttpHandler(new MyHttpHandler(api.organizer(), uniqueUrlList));
     }
 }

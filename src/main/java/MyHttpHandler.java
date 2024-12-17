@@ -1,21 +1,19 @@
-import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.handler.*;
-import burp.api.montoya.http.message.HttpRequestResponse;
+import burp.api.montoya.organizer.Organizer;
+import burp.api.montoya.persistence.PersistedList;
 
-import java.util.ArrayList;
-import java.util.List;
+import static burp.api.montoya.core.ToolType.*;
+import static burp.api.montoya.http.message.HttpRequestResponse.httpRequestResponse;
 
 public class MyHttpHandler implements HttpHandler
 {
-    private final MontoyaApi api;
-    private final List<String> uniqueUrlList;
+    private final Organizer organizer;
+    private final PersistedList<String> uniqueUrlList;
 
-    public MyHttpHandler(MontoyaApi api)
+    public MyHttpHandler(Organizer organizer, PersistedList<String> uniqueUrlList)
     {
-        this.api = api;
-
-        uniqueUrlList = new ArrayList<>();
+        this.organizer = organizer;
+        this.uniqueUrlList = uniqueUrlList;
     }
 
     @Override
@@ -29,7 +27,7 @@ public class MyHttpHandler implements HttpHandler
     {
         if (matchesCriteria(responseReceived))
         {
-            api.organizer().sendToOrganizer(HttpRequestResponse.httpRequestResponse(responseReceived.initiatingRequest(), responseReceived));
+            organizer.sendToOrganizer(httpRequestResponse(responseReceived.initiatingRequest(), responseReceived));
             uniqueUrlList.add(responseReceived.initiatingRequest().url());
         }
 
@@ -38,6 +36,8 @@ public class MyHttpHandler implements HttpHandler
 
     private boolean matchesCriteria(HttpResponseReceived responseReceived)
     {
-        return responseReceived.toolSource().isFromTool(ToolType.PROXY, ToolType.REPEATER, ToolType.TARGET) && api.scope().isInScope(responseReceived.initiatingRequest().url()) && !uniqueUrlList.contains(responseReceived.initiatingRequest().url());
+        return responseReceived.toolSource().isFromTool(PROXY, REPEATER, TARGET)
+                && responseReceived.initiatingRequest().isInScope()
+                && !uniqueUrlList.contains(responseReceived.initiatingRequest().url());
     }
 }
