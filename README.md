@@ -1,10 +1,14 @@
 # OrganizerTracker
-Automatically send requests to the Organizer tool.
-
 Automatically sends unique requests to Organizer.
 
-Matching criteria: unique URL, in scope, from tool Proxy, Target or Repeater.
-
-Will throw an error if there are no configured items in scope.
+Matching criteria:
+- Unique URL
+- In scope
+- From tool:
+  - Proxy
+  - Target
+  - Repeater
 
 To modify, adjust criteria in `MyHttpHandler.matchesCriteria()`
+
+This extension will persist data to the project file.
